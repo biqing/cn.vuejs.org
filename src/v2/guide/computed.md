@@ -6,7 +6,7 @@ order: 5
 
 ## 计算属性
 
-在模板中绑定表达式是非常便利的，但是它们实际上只用于简单的操作。在模板中放入太多的逻辑会让模板过重且难以维护。例如：
+模板内的表达式是非常便利的，但是它们实际上只用于简单的运算。在模板中放入太多的逻辑会让模板过重且难以维护。例如：
 
 ```html
 <div id="example">
@@ -14,9 +14,9 @@ order: 5
 </div>
 ```
 
-在这种情况下，模板不再简单和清晰。在实现反向显示 `message` 之前，你应该确认它。这个问题在你不止一次反向显示 message 的时候变得更加糟糕。
+在这种情况下，模板不再简单和清晰。在意识到这是反向显示 `message` 之前，你不得不再次确认第二遍。当你想要在模板中多次反向显示 message 的时候，问题会变得更糟糕。
 
-这就是为什么任何复杂逻辑，你都应当使用**计算属性**。
+这就是对于任何复杂逻辑，你都应当使用**计算属性**的原因。
 
 ### 基础例子
 
@@ -76,30 +76,30 @@ vm.message = 'Goodbye'
 console.log(vm.reversedMessage) // -> 'eybdooG'
 ```
 
-你可以打开浏览器的控制台，修改 vm 。 `vm.reversedMessage` 的值始终取决于 `vm.message` 的值。
+你可以打开浏览器的控制台，自行修改例子中的 vm 。 `vm.reversedMessage` 的值始终取决于 `vm.message` 的值。
 
-你可以像绑定普通属性一样在模板中绑定计算属性。 Vue 知道 `vm.reversedMessage` 依赖于 `vm.message` ，因此当 `vm.message` 发生改变时，依赖于 `vm.reversedMessage` 的绑定也会更新。而且最妙的是我们是声明式地创建这种依赖关系：计算属性的 getter 是干净无副作用的，因此也是易于测试和理解的。
+你可以像绑定普通属性一样在模板中绑定计算属性。 Vue 知道 `vm.reversedMessage` 依赖于 `vm.message` ，因此当 `vm.message` 发生改变时，所有依赖于 `vm.reversedMessage` 的绑定也会更新。而且最妙的是我们已经以声明的方式创建了这种依赖关系：计算属性的 getter 是没有副作用，这使得它易于测试和推理。
 
 ### 计算缓存 vs Methods
 
-你可能已经注意到我们可以通过调用表达式中的method来达到同样的效果：
+你可能已经注意到我们可以通过调用表达式中的 method 来达到同样的效果：
 
 ``` html
-<p>Reversed message: "{{ reverseMessage() }}"</p>
+<p>Reversed message: "{{ reversedMessage() }}"</p>
 ```
 
 ``` js
 // in component
 methods: {
-  reverseMessage: function () {
+  reversedMessage: function () {
     return this.message.split('').reverse().join('')
   }
 }
 ```
 
-不经过计算属性，我们可以在 method 中定义一个相同的函数来替代它。对于最终的结果，两种方式确实是相同的。然而，不同的是**计算属性是基于它的依赖缓存**。计算属性只有在它的相关依赖发生改变时才会重新取值。这就意味着只要 `message` 没有发生改变，多次访问 `reversedMessage` 计算属性会立即返回之前的计算结果，而不必再次执行函数。
+我们可以将同一函数定义为一个 method 而不是一个计算属性。对于最终的结果，两种方式确实是相同的。然而，不同的是**计算属性是基于它们的依赖进行缓存的**。计算属性只有在它的相关依赖发生改变时才会重新求值。这就意味着只要 `message` 还没有发生改变，多次访问 `reversedMessage` 计算属性会立即返回之前的计算结果，而不必再次执行函数。
 
-这也同样意味着如下计算属性将不会更新，因为 `Date.now()` 不是响应式依赖：
+这也同样意味着下面的计算属性将不再更新，因为 `Date.now()` 不是响应式依赖：
 
 ``` js
 computed: {
@@ -109,13 +109,12 @@ computed: {
 }
 ```
 
-相比而言，每当重新渲染的时候，method 调用**总会**执行函数。
+相比而言，只要发生重新渲染，method 调用**总会**执行该函数。
 
-我们为什么需要缓存？假设我们有一个重要的计算属性 **A** ，这个计算属性需要一个巨大的数组遍历和做大量的计算。然后我们可能有其他的计算属性依赖于 **A** 。如果没有缓存，我们将不可避免的多次执行 **A** 的 getter ！如果你不希望有缓存，请用 method 替代。
+我们为什么需要缓存？假设我们有一个性能开销比较大的的计算属性 **A** ，它需要遍历一个极大的数组和做大量的计算。然后我们可能有其他的计算属性依赖于 **A** 。如果没有缓存，我们将不可避免的多次执行 **A** 的 getter！如果你不希望有缓存，请用 method 替代。
 
-### 计算属性 vs Watched Property
-
-Vue.js 提供了一个方法 `$watch` ，它用于观察 Vue 实例上的数据变动。当一些数据需要根据其它数据变化时， `$watch` 很诱人 —— 特别是如果你来自 AngularJS 。不过，通常更好的办法是使用计算属性而不是一个命令式的 `$watch` 回调。思考下面例子：
+### Computed 属性 vs Watched 属性
+Vue 确实提供了一种更通用的方式来观察和响应 Vue 实例上的数据变动：watch 属性。当你有一些数据需要随着其它数据变动而变动时，你很容易滥用 `watch`——特别是如果你之前使用过 AngularJS。然而，通常更好的想法是使用 computed 属性而不是命令式的 `watch` 回调。细想一下这个例子：
 
 ``` html
 <div id="demo">{{ fullName }}</div>
@@ -140,7 +139,7 @@ var vm = new Vue({
 })
 ```
 
-上面代码是命令式的和重复的。跟计算属性对比：
+上面代码是命令式的和重复的。将它与 computed 属性的版本进行比较：
 
 ``` js
 var vm = new Vue({
@@ -157,7 +156,7 @@ var vm = new Vue({
 })
 ```
 
-这样更好，不是吗？
+好得多了，不是吗？
 
 ### 计算 setter
 
@@ -182,7 +181,7 @@ computed: {
 // ...
 ```
 
-现在在运行 `vm.fullName = 'John Doe'` 时， setter 会被调用， `vm.firstName` 和 `vm.lastName` 也会被对应更新。
+现在在运行 `vm.fullName = 'John Doe'` 时， setter 会被调用， `vm.firstName` 和 `vm.lastName` 也相应地会被更新。
 
 ## 观察 Watchers
 
