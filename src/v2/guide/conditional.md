@@ -76,7 +76,7 @@ order: 7
 </div>
 ```
 
-类似于 `v-else`,，`v-else-if` 必须紧跟在 `v-if` 或者 `v-else-if` 元素之后。
+类似于 `v-else`，`v-else-if` 必须紧跟在 `v-if` 或者 `v-else-if` 元素之后。
 
 ### 用 `key` 管理可复用的元素
 
@@ -93,7 +93,7 @@ Vue 会尽可能高效地渲染元素，通常会复用已有元素而不是从�
 </template>
 ```
 
-那么在上面的代码中切换 `loginType` 将不会清除用户已经输入的内容。因为两个模版使用了相同的元素，`<input>` 不会被替换掉——仅仅是替换了它的的 `placeholder`。
+那么在上面的代码中切换 `loginType` 将不会清除用户已经输入的内容。因为两个模版使用了相同的元素，`<input>` 不会被替换掉——仅仅是替换了它的 `placeholder`。
 
 自己动手试一试，在输入框中输入一些文本，然后按下切换按钮：
 
@@ -199,5 +199,5 @@ new Vue({
 
 当 v-if 与 v-for 一起使用时，v-for 具有比 v-if 更高的优先级。
 
-请查阅 [列表渲染指南](http://vuejs.org/v2/guide/list.html#v-for-with-v-if) 以获取详细信息。
+请查阅 [列表渲染指南](../guide/list.html#v-for-with-v-if) 以获取详细信息。
 

@@ -255,12 +255,12 @@ new Vue({ el: '#range' })
 
 ``` js
 Vue.component('todo-item', {
-  template: '\
-    <li>\
-      {{ title }}\
-      <button v-on:click="$emit(\'remove\')">X</button>\
-    </li>\
-  ',
+  template: `
+    <li>
+      {{ title }}
+      <button v-on:click="$emit('remove')">X</button>
+    </li>
+  `,
   props: ['title']
 })
 
@@ -301,12 +301,12 @@ new Vue({
 </div>
 <script>
 Vue.component('todo-item', {
-  template: '\
-    <li>\
-      {{ title }}\
-      <button v-on:click="$emit(\'remove\')">X</button>\
-    </li>\
-  ',
+  template: `
+    <li>
+      {{ title }}
+      <button v-on:click="$emit('remove')">X</button>
+    </li>
+  `,
   props: ['title']
 })
 new Vue({
@@ -328,6 +328,28 @@ new Vue({
 })
 </script>
 {% endraw %}
+
+### `v-for` with `v-if`
+
+当它们处于同一节点， `v-for` 的优先级比 `v-if` 更高，这意味着 `v-if` 将分别重复运行于每个 `v-for` 循环中。当你想为仅有的 _一些_ 项渲染节点时，这种优先级的机制会十分有用，如下：
+
+``` html
+<li v-for="todo in todos" v-if="!todo.isComplete">
+  {{ todo }}
+</li>
+```
+
+上面的代码只传递了未complete的todos。
+
+而如果你的目的是有条件地跳过循环的执行，那么将 `v-if` 置于包装元素 (或 [`<template>`](conditional.html#Conditional-Groups-with-v-if-on-lt-template-gt))上。如:
+
+``` html
+<ul v-if="shouldRenderTodos">
+  <li v-for="todo in todos">
+    {{ todo }}
+  </li>
+</ul>
+```
 
 ## key
 

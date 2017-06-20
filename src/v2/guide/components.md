@@ -6,7 +6,7 @@ order: 11
 
 ## 什么是组件？
 
-组件（Component）是 Vue.js 最强大的功能之一。组件可以扩展 HTML 元素，封装可重用的代码。在较高层面上，组件是自定义元素， Vue.js 的编译器为它添加特殊功能。在有些情况下，组件也可以是原生 HTML 元素的形式，以 js 特性扩展。
+组件（Component）是 Vue.js 最强大的功能之一。组件可以扩展 HTML 元素，封装可重用的代码。在较高层面上，组件是自定义元素， Vue.js 的编译器为它添加特殊功能。在有些情况下，组件也可以是原生 HTML 元素的形式，以 is 特性扩展。
 
 ## 使用组件
 
@@ -93,7 +93,7 @@ new Vue({
 
 ### DOM 模版解析说明
 
-当使用 DOM 作为模版时（例如，将 `el` 选项挂载到一个已存在的元素上）, 你会受到 HTML 的一些限制，因为 Vue 只有在浏览器解析和标准化 HTML 后才能获取模版内容。尤其像这些元素 `<ul>` ， `<ol>`， `<table>` ， `<select>` 限制了能被它包裹的元素， `<option>` 只能出现在其它元素内部。
+当使用 DOM 作为模版时（例如，将 `el` 选项挂载到一个已存在的元素上）, 你会受到 HTML 的一些限制，因为 Vue 只有在浏览器解析和标准化 HTML 后才能获取模版内容。尤其像这些元素 `<ul>` ，`<ol>`，`<table>` ，`<select>` 限制了能被它包裹的元素， 而一些像 `<option>` 这样的元素只能出现在某些其它元素内部。
 
 在自定义组件中使用这些受限制的元素时会导致一些问题，例如：
 
@@ -331,14 +331,14 @@ new Vue({
 初学者常犯的一个错误是使用字面量语法传递数值：
 
 ``` html
-<!-- 传递了一个字符串"1" -->
+<!-- 传递了一个字符串 "1" -->
 <comp some-prop="1"></comp>
 ```
 
 因为它是一个字面 prop ，它的值是字符串 `"1"` 而不是number。如果想传递一个实际的number，需要使用 `v-bind` ，从而让它的值被当作 JavaScript 表达式计算：
 
 ``` html
-<!-- 传递实际的mumber -->
+<!-- 传递实际的 number -->
 <comp v-bind:some-prop="1"></comp>
 ```
 
@@ -437,7 +437,7 @@ Vue.component('example', {
 
 ### 使用 `v-on` 绑定自定义事件
 
-每个 Vue 实例都实现了[事件接口(Events interface)](../api/#Instance-Methods-Events)，即：
+每个 Vue 实例都实现了[事件接口(Events interface)](../api/#实例方法-事件)，即：
 
 - 使用 `$on(eventName)` 监听事件
 - 使用 `$emit(eventName)` 触发事件
@@ -530,6 +530,34 @@ new Vue({
 
 ``` html
 <my-component v-on:click.native="doTheThing"></my-component>
+```
+
+### `.sync` 修饰符
+
+> 2.3.0+
+
+在一些情况下，我们可能会需要对一个 prop 进行『双向绑定』。事实上，这正是 Vue 1.x 中的 `.sync`修饰符所提供的功能。当一个子组件改变了一个 prop 的值时，这个变化也会同步到父组件中所绑定的值。这很方便，但也会导致问题，因为它破坏了『单向数据流』的假设。由于子组件改变 prop 的代码和普通的状态改动代码毫无区别，当光看子组件的代码时，你完全不知道它何时悄悄地改变了父组件的状态。这在 debug 复杂结构的应用时会带来很高的维护成本。
+
+上面所说的正是我们在 2.0 中移除 `.sync` 的理由。但是在 2.0 发布之后的实际应用中，我们发现 `.sync` 还是有其适用之处，比如在开发可复用的组件库时。我们需要做的只是**让子组件改变父组件状态的代码更容易被区分**。
+
+在 2.3 我们重新引入了 `.sync` 修饰符，但是这次它只是作为一个编译时的语法糖存在。它会被扩展为一个自动更新父组件属性的 `v-on` 侦听器。
+
+如下代码
+
+``` html
+<comp :foo.sync="bar"></comp>
+```
+
+会被扩展为：
+
+``` html
+<comp :foo="bar" @update:foo="val => bar = val"></comp>
+```
+
+当子组件需要更新 `foo` 的值时，它需要显式地触发一个更新事件：
+
+``` js
+this.$emit('update:foo', newValue)
 ```
 
 ### 使用自定义事件的表单输入组件
@@ -862,7 +890,7 @@ Vue.component('child-component', {
 
 ``` html
 <my-awesome-list :items="items">
-  <!-- 作用域插槽也可以在这里命名 -->
+  <!-- 作用域插槽也可以是具名的 -->
   <template slot="item" scope="props">
     <li class="my-fancy-item">{{ props.text }}</li>
   </template>
@@ -876,7 +904,7 @@ Vue.component('child-component', {
   <slot name="item"
     v-for="item in items"
     :text="item.text">
-    <!-- fallback content here -->
+    <!-- 这里写入备用内容 -->
   </slot>
 </ul>
 ```
@@ -1012,11 +1040,34 @@ Vue.component('async-webpack-example', function (resolve) {
 ``` js
 Vue.component(
   'async-webpack-example',
-  () => System.import('./my-async-component')
+  () => import('./my-async-component')
 )
 ```
 
 <p class="tip">如果你是 <strong>Browserify</strong> 用户,可能就无法使用异步组件了,它的作者已经[表明](https://github.com/substack/node-browserify/issues/58#issuecomment-21978224) Browserify 是不支持异步加载的。Browserify 社区发现 [一些解决方法](https://github.com/vuejs/vuejs.org/issues/620)，可能有助于已存在的复杂应用。对于其他场景，我们推荐简单实用 Webpack 构建，一流的异步支持</p>
+
+### 高级异步组件
+
+> New in 2.3.0
+
+自 2.3 起，异步组件的工厂函数也可以返回一个如下的对象：
+
+``` js
+const AsyncComp = () => ({
+  // 需要加载的组件. 应当是一个 Promise
+  component: import('./MyComp.vue'),
+  // loading 时应当渲染的组件
+  loading: LoadingComp,
+  // 出错时渲染的组件
+  error: ErrorComp,
+  // 渲染 loading 组件前的等待时间。默认：200ms.
+  delay: 200,
+  // 最长等待时间。超出此时间则渲染 error 组件。默认：Infinity
+  timeout: 3000
+})
+```
+
+注意，当一个异步组件被作为 `vue-router` 的路由组件使用时，这些高级选项都是无效的，因为在路由切换前就会提前加载所需要的异步组件。另外，如果你要在路由组件中上述写法，需要使用 `vue-router` 2.4.0+。
 
 ### 组件命名约定
 
@@ -1106,7 +1157,6 @@ template: '<div><stack-overflow></stack-overflow></div>'
 </ul>
 ```
 
-When you look closely, you'll see that these components will actually be each other's descendent _and_ ancestor in the render tree - a paradox! When registering components globally with `Vue.component`, this paradox is resolved for you automatically. If that's you, you can stop reading here.
 当你仔细看时，会发现在渲染树上这两个组件同时为对方的父节点和子节点--这点是矛盾的。当使用`Vue.component`将这两个组件注册为全局组件的时候，框架会自动为你解决这个矛盾，如果你是这样做的，就不用继续往下看了。
 然而，如果你使用诸如Webpack或者Browserify之类的模块化管理工具来requiring/importing组件的话，就会报错了：
 ```
@@ -1157,7 +1207,7 @@ Vue.component('hello-world', {
 
 这在有很多模版或者小的应用中有用，否则应该避免使用，因为它将模版和组件的其他定义隔离了。
 
-### 对低开销的静态组件使用 `v-once` 
+### 对低开销的静态组件使用 `v-once`
 
 尽管在 Vue 中渲染 HTML 很快，不过当组件中包含**大量**静态内容时，可以考虑使用 `v-once` 将渲染结果缓存起来，就像这样：
 
